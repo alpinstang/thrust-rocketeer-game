@@ -21,27 +21,40 @@ public class Rocket : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Rotate();
-        Thrust();
+        if(state == State.Alive)
+        {
+            Rotate();
+            Thrust();
+        }
+        
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+        if(state != State.Alive){ return; }
+
         switch(collision.gameObject.tag)
         {
             case "Friendly":
                 // do nothing
                 break;
             case "Finish":
-                Invoke("LoadNextScene", 1f);
+                state = State.Transcending;
+                Invoke("LoadNextLevel", 1f);
                 break;
             default:
-                SceneManager.LoadScene(0);
+                state = State.Dying;
+                Invoke("LoadFirstLevel", 1f);
                 break;
         }
     }
 
-    private void LoadNextScene()
+    private void LoadFirstLevel()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    private void LoadNextLevel()
     {
         SceneManager.LoadScene(1); // TODO: allow for more than 2 levels
     }
