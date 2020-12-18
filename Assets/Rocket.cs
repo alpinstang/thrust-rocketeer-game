@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour
 {
@@ -10,6 +8,8 @@ public class Rocket : MonoBehaviour
 
     Rigidbody rigidBody;
     AudioSource audioSource;
+    enum State { Alive, Dying, Transcending };
+    State state = State.Alive;
 
     // Start is called before the first frame update
     void Start()
@@ -32,10 +32,18 @@ public class Rocket : MonoBehaviour
             case "Friendly":
                 // do nothing
                 break;
+            case "Finish":
+                Invoke("LoadNextScene", 1f);
+                break;
             default:
-                // crash
+                SceneManager.LoadScene(0);
                 break;
         }
+    }
+
+    private void LoadNextScene()
+    {
+        SceneManager.LoadScene(1); // TODO: allow for more than 2 levels
     }
 
     private void Rotate()
