@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour
@@ -19,6 +20,7 @@ public class Rocket : MonoBehaviour
     AudioSource audioSource;
     enum State { Alive, Dying, Transcending };
     State state = State.Alive;
+    bool collisionsDisabled = false;
 
     // Start is called before the first frame update
     void Start()
@@ -30,17 +32,32 @@ public class Rocket : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(state == State.Alive)
+        if (state == State.Alive)
         {
             RespondToRotateInput();
             RespondToThrustInput();
         }
-        
+        if(Debug.isDebugBuild)
+        {
+            RespondToDebugKeys();
+        }
+    }
+
+    private void RespondToDebugKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            LoadNextLevel();
+        }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            collisionsDisabled = !collisionsDisabled;
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(state != State.Alive){ return; }
+        if (state != State.Alive || collisionsDisabled){ return; }
 
         switch(collision.gameObject.tag)
         {
@@ -83,7 +100,13 @@ public class Rocket : MonoBehaviour
     private void LoadNextLevel()
     {
         completeLevelParticles.Stop();
-        SceneManager.LoadScene(1); // TODO: allow for more than 2 levels
+        int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+        int nextSceneIndex = sceneIndex + 1;
+        if(nextSceneIndex == SceneManager.sceneCountInBuildSettings)
+        {
+            nextSceneIndex = 0;
+        }
+        SceneManager.LoadScene(nextSceneIndex); // TODO: allow for more than 2 levels
     }
 
     private void RespondToRotateInput()
